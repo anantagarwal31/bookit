@@ -1,5 +1,7 @@
 import { api } from './client';
 import type {
+  Availability,
+  EventDetail,
   EventSummary,
   LoginPayload,
   PaginationInfo,
@@ -41,4 +43,12 @@ export const eventsApi = {
       pagination: PaginationInfo;
     }>(`/events?${params.toString()}`);
   },
+
+  detail: (id: number | string) =>
+    api.get<{ event: EventDetail }>(`/events/${id}`),
+
+  availability: (id: number | string) =>
+    api.get<{ availability: Availability }>(
+      `/events/${id}/availability`
+    ),
 };

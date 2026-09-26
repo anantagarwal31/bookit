@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express';
 import * as eventService from '../services/event.service';
+import * as v from '../utils/validate';
 
 export async function list(req: Request, res: Response): Promise<void> {
   const result = await eventService.listEvents({
@@ -10,4 +11,25 @@ export async function list(req: Request, res: Response): Promise<void> {
   });
 
   res.json(result);
+}
+
+export async function detail(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const eventId = v.requireId(req.params.id, 'event id');
+  const event = await eventService.getEventById(eventId);
+
+  res.json({ event });
+}
+
+export async function availability(
+  req: Request,
+  res: Response
+): Promise<void> {
+  const eventId = v.requireId(req.params.id, 'event id');
+
+  res.json({
+    availability: await eventService.getAvailability(eventId),
+  });
 }

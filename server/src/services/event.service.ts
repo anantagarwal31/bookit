@@ -1,5 +1,8 @@
 import * as db from '../db/pool';
+import { ApiError } from '../utils/ApiError';
 import type {
+  Availability,
+  EventDetail,
   EventSummary,
   ListEventsQuery,
   ListEventsResult,
@@ -78,4 +81,47 @@ export async function listEvents({
       totalPages: Math.max(Math.ceil(total / safePageSize), 1),
     },
   };
+}
+
+export async function getEventById(
+  eventId: number
+): Promise<EventDetail> {
+  const { rows } = await db.query<EventDetail>(
+    `SELECT ${EVENT_COLUMNS}
+       FROM events e
+       JOIN users u ON u.id = e.organizer_id
+      WHERE e.id = $1`,
+    [eventId]
+  );
+
+  const event = rows[0];
+
+  if (!event) {
+    throw new ApiError(404, 'Event not found');
+  }
+
+  return event;
+}
+
+export async function getAvailability(
+  eventId: number
+): Promise<Availability> {
+  const { rows } = await db.query<Availability>(
+    `SELECT id,
+            capacity,
+            seats_booked,
+            (capacity - seats_booked) AS seats_remaining,
+            (seats_booked >= capacity) AS is_sold_out
+       FROM events
+      WHERE id = $1`,
+    [eventId]
+  );
+
+  const availability = rows[0];
+
+  if (!availability) {
+    throw new ApiError(404, 'Event not found');
+  }
+
+  return availability;
 }

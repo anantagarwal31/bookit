@@ -53,3 +53,13 @@ export function requireRole(value: unknown): UserRole {
 
   return role;
 }
+
+export function requireId(value: unknown, field: string): number {
+  const id = Number(value);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new ApiError(400, `Invalid ${field}`);
+  }
+
+  return id;
+}

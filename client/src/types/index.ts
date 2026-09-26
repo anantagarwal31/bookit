@@ -33,6 +33,16 @@ export interface EventSummary {
   organizer_name: string;
 }
 
+export interface EventDetail extends EventSummary {}
+
+export interface Availability {
+  id: number;
+  capacity: number;
+  seats_booked: number;
+  seats_remaining: number;
+  is_sold_out: boolean;
+}
+
 export interface PaginationInfo {
   page: number;
   pageSize: number;
