@@ -1,5 +1,11 @@
 import { api } from './client';
-import type { LoginPayload, SignupPayload, User } from '../types';
+import type {
+  EventSummary,
+  LoginPayload,
+  PaginationInfo,
+  SignupPayload,
+  User,
+} from '../types';
 
 export const authApi = {
   signup: (payload: SignupPayload) =>
@@ -13,4 +19,26 @@ export const authApi = {
 
   me: () =>
     api.get<{ user: User | null }>('/auth/me'),
+};
+
+interface ListEventsParams {
+  search?: string;
+  date?: string;
+  page?: number;
+}
+
+export const eventsApi = {
+  list: ({ search = '', date = '', page = 1 }: ListEventsParams = {}) => {
+    const params = new URLSearchParams();
+
+    if (search) params.set('search', search);
+    if (date) params.set('date', date);
+
+    params.set('page', String(page));
+
+    return api.get<{
+      events: EventSummary[];
+      pagination: PaginationInfo;
+    }>(`/events?${params.toString()}`);
+  },
 };

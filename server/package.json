@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "migrate": "npm run build && npm run migrate:run",
     "migrate:down": "npm run build && node-pg-migrate -m dist/migrations --ignore-pattern \".*\\\\.map\" down",
-    "migrate:run": "node-pg-migrate -m dist/migrations --ignore-pattern \".*\\\\.map\" up"
+    "migrate:run": "node-pg-migrate -m dist/migrations --ignore-pattern \".*\\\\.map\" up",
+    "seed": "tsx src/db/seed.ts"
   },
   "keywords": [],
   "author": "",

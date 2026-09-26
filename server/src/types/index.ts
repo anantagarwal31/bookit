@@ -30,3 +30,35 @@ export interface AuthTokenPayload {
   role: UserRole;
   name: string;
 }
+
+export interface EventSummary {
+  id: number;
+  title: string;
+  description: string;
+  venue: string;
+  starts_at: string;
+  capacity: number;
+  seats_booked: number;
+  seats_remaining: number;
+  is_sold_out: boolean;
+  price_cents: number;
+  organizer_id: number;
+  organizer_name: string;
+}
+
+export interface ListEventsQuery {
+  search?: string | null;
+  date?: string | null;
+  page?: string;
+  pageSize?: string;
+}
+
+export interface ListEventsResult {
+  events: EventSummary[];
+  pagination: {
+    page: number;
+    pageSize: number;
+    total: number;
+    totalPages: number;
+  };
+}

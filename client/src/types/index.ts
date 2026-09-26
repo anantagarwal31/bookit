@@ -17,3 +17,25 @@ export interface SignupPayload extends LoginPayload {
   name: string;
   role: UserRole;
 }
+
+export interface EventSummary {
+  id: number;
+  title: string;
+  description: string;
+  venue: string;
+  starts_at: string;
+  capacity: number;
+  seats_booked: number;
+  seats_remaining: number;
+  is_sold_out: boolean;
+  price_cents: number;
+  organizer_id: number;
+  organizer_name: string;
+}
+
+export interface PaginationInfo {
+  page: number;
+  pageSize: number;
+  total: number;
+  totalPages: number;
+}
