@@ -1,36 +1,26 @@
 import express from 'express';
 import cors from 'cors';
-import pool from './db/pool.js';
+import cookieParser from 'cookie-parser';
+
+import { env } from './config/env';
+import routes from './routes';
+import { attachUser } from './middleware/auth';
+import { errorHandler, notFound } from './middleware/errorHandler';
 
 const app = express();
 
-app.use(cors());
+if (env.nodeEnv === 'production') {
+  app.set('trust proxy', 1);
+}
+
+app.use(cors({ origin: env.clientOrigins, credentials: true }));
 app.use(express.json());
+app.use(cookieParser());
+app.use(attachUser);
 
-app.get('/health', (_req, res) => {
-  res.json({
-    status: 'ok',
-    message: 'BookIt API is running',
-  });
-});
+app.use('/api', routes);
 
-app.get('/health/db', async (_req, res) => {
-  try {
-    const result = await pool.query('SELECT NOW() AS now');
-
-    res.json({
-      status: 'ok',
-      database: 'connected',
-      time: result.rows[0].now,
-    });
-  } catch (error) {
-    console.error('Database connection failed:', error);
-
-    res.status(500).json({
-      status: 'error',
-      database: 'disconnected',
-    });
-  }
-});
+app.use(notFound);
+app.use(errorHandler);
 
 export default app;
