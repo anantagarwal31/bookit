@@ -13,12 +13,12 @@ export async function list(req: Request, res: Response): Promise<void> {
   res.json(result);
 }
 
-export async function detail(
-  req: Request,
-  res: Response
-): Promise<void> {
+export async function detail(req: Request, res: Response): Promise<void> {
   const eventId = v.requireId(req.params.id, 'event id');
-  const event = await eventService.getEventById(eventId);
+  const event = await eventService.getEventById(
+    eventId,
+    req.user?.id ?? null
+  );
 
   res.json({ event });
 }

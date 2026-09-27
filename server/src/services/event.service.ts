@@ -84,14 +84,22 @@ export async function listEvents({
 }
 
 export async function getEventById(
-  eventId: number
+  eventId: number,
+  viewerId: number | null = null
 ): Promise<EventDetail> {
   const { rows } = await db.query<EventDetail>(
-    `SELECT ${EVENT_COLUMNS}
+    `SELECT ${EVENT_COLUMNS},
+            EXISTS (
+              SELECT 1
+              FROM bookings b
+              WHERE b.event_id = e.id
+                AND b.user_id = $2
+                AND b.status = 'confirmed'
+            ) AS has_booked
        FROM events e
        JOIN users u ON u.id = e.organizer_id
       WHERE e.id = $1`,
-    [eventId]
+    [eventId, viewerId]
   );
 
   const event = rows[0];

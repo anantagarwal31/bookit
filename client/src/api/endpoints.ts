@@ -51,4 +51,16 @@ export const eventsApi = {
     api.get<{ availability: Availability }>(
       `/events/${id}/availability`
     ),
+
+  book: (id: number | string) =>
+    api.post<{
+      booking: { id: number };
+      event: {
+        id: number;
+        title: string;
+        seats_booked: number;
+        capacity: number;
+        seats_remaining: number;
+      };
+    }>(`/bookings/${id}`),
 };

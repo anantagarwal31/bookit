@@ -63,9 +63,9 @@ export interface ListEventsResult {
     totalPages: number;
   };
 }
-
-export interface EventDetail extends EventSummary {}
-
+export interface EventDetail extends EventSummary {
+  has_booked: boolean;
+}
 export interface Availability {
   id: number;
   capacity: number;
