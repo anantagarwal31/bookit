@@ -1,4 +1,5 @@
 export type UserRole = 'user' | 'organizer';
+export type BookingStatus = 'confirmed' | 'cancelled';
 
 export interface PublicUser {
   id: number;
@@ -71,4 +72,13 @@ export interface Availability {
   seats_booked: number;
   seats_remaining: number;
   is_sold_out: boolean;
+}
+
+export interface BookingRow {
+  id: number;
+  event_id: number;
+  user_id: number;
+  status: BookingStatus;
+  created_at: string;
+  cancelled_at: string | null;
 }
