@@ -1,12 +1,12 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "type": "module",
   "main": "dist/server.js",
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "start:deploy": "npm run migrate:run && node dist/db/seed.js --if-empty && npm start",
     "typecheck": "tsc --noEmit",
     "migrate": "npm run build && npm run migrate:run",
     "migrate:down": "npm run build && node-pg-migrate -m dist/migrations --ignore-pattern \".*\\\\.map\" down",

@@ -1,0 +1,29 @@
+# Starts the API (after running migrations + seed) and the React app.
+#
+#   docker compose up --build
+#
+#   React app -> http://localhost:3000
+#   API       -> http://localhost:4000/api
+
+services:
+  api:
+    build: ./server
+    env_file:
+      - ./server/.env
+    environment:
+      PORT: 4000
+      NODE_ENV: production
+      CLIENT_ORIGINS: http://localhost:3000,http://localhost:5173
+    ports:
+      - '4000:4000'
+    command: npm run start:deploy
+
+  web:
+    build:
+      context: ./client
+      args:
+        VITE_API_URL: http://localhost:4000/api
+    depends_on:
+      - api
+    ports:
+      - '3000:80'

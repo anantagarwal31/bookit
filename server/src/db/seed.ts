@@ -1,8 +1,9 @@
 import bcrypt from 'bcryptjs';
 import * as db from './pool';
+import type { UserRole } from '../types';
 
 const DEMO_PASSWORD = 'Password123';
-const EVENT_COUNT = 50;
+const FILLER_EVENT_COUNT = Number(process.env.SEED_EVENT_COUNT || 500);
 
 const CITIES = [
   'Bengaluru',
@@ -42,23 +43,48 @@ const daysFromNow = (days: number, hour = 18): string => {
   return date.toISOString();
 };
 
+interface SeedUser {
+  id: number;
+  email: string;
+  role: UserRole;
+}
+
+async function hasExistingData(): Promise<boolean> {
+  const { rows } = await db.query<{ count: number }>(
+    'SELECT COUNT(*)::int AS count FROM users'
+  );
+  return (rows[0]?.count ?? 0) > 0;
+}
+
 async function seed(): Promise<void> {
+  if (process.argv.includes('--if-empty') && (await hasExistingData())) {
+    console.log('Database already has data - skipping seed.');
+    await db.pool.end();
+    return;
+  }
+
+  console.log('Seeding database...');
+
+  await db.query(
+    'TRUNCATE users, events, bookings, activity_log RESTART IDENTITY CASCADE'
+  );
+
   const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
 
-  const { rows: organizers } = await db.query<{ id: number }>(
+  const { rows: users } = await db.query<SeedUser>(
     `INSERT INTO users (name, email, password_hash, role)
-     VALUES ('BookIt Organizer', 'organizer@bookit.com', $1, 'organizer')
-     ON CONFLICT (email) DO UPDATE
-     SET role = 'organizer'
-     RETURNING id`,
+     VALUES
+       ('Anant Sharma',  'organizer@bookit.com',  $1, 'organizer'),
+       ('Priya Menon',   'organizer2@bookit.com', $1, 'organizer'),
+       ('Rahul Verma',   'user@bookit.com',       $1, 'user'),
+       ('Sneha Iyer',    'user2@bookit.com',      $1, 'user'),
+       ('Karan Gupta',   'user3@bookit.com',      $1, 'user')
+     RETURNING id, email, role`,
     [passwordHash]
   );
 
-  const organizerId = organizers[0]?.id;
-
-  if (!organizerId) {
-    throw new Error('Could not create or find organizer');
-  }
+  const organizers = users.filter((u) => u.role === 'organizer');
+  const attendees = users.filter((u) => u.role === 'user');
 
   const showcaseEvents: [
     string,
@@ -70,7 +96,7 @@ async function seed(): Promise<void> {
   ][] = [
     [
       'React India Meetup',
-      'A hands-on evening about React, hooks and performance patterns.',
+      'A hands-on evening about React 19, hooks and performance patterns. Snacks included.',
       'Tech Park Auditorium, Bengaluru',
       daysFromNow(3),
       50,
@@ -78,7 +104,7 @@ async function seed(): Promise<void> {
     ],
     [
       'Node.js Deep Dive',
-      'Build a production-ready REST API with transactions and indexes.',
+      'Build a production-ready REST API: transactions, indexes and error handling.',
       'WeWork Galaxy, Bengaluru',
       daysFromNow(6),
       30,
@@ -93,30 +119,32 @@ async function seed(): Promise<void> {
       0,
     ],
     [
-      'Jazz Evening',
-      'An intimate jazz session with a live quartet.',
+      'Sold Out Jazz Evening',
+      'An intimate jazz session with a live quartet. Limited seating.',
       'Blue Door Cafe, Mumbai',
       daysFromNow(4),
-      100,
+      4,
       129900,
     ],
     [
-      'UX Clinic',
-      'Bring your product and get a live design critique.',
+      'Almost Full: UX Clinic',
+      'Bring your product, get a live design critique from senior designers.',
       'Design Studio, Pune',
       daysFromNow(8),
-      75,
+      10,
       59900,
     ],
     [
       'Weekend Photography Walk',
-      'Explore the old city and learn street photography basics.',
+      'Explore the old city at sunrise and learn street photography basics.',
       'City Palace Gate, Jaipur',
       daysFromNow(12),
       25,
       29900,
     ],
   ];
+
+  const eventIds: number[] = [];
 
   for (const [
     title,
@@ -126,32 +154,28 @@ async function seed(): Promise<void> {
     capacity,
     priceCents,
   ] of showcaseEvents) {
-    await db.query(
-      `INSERT INTO events
-        (organizer_id, title, description, venue, starts_at, capacity, price_cents)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [
-        organizerId,
-        title,
-        description,
-        venue,
-        startsAt,
-        capacity,
-        priceCents,
-      ]
+    const organizerId = pick(organizers).id;
+
+    const { rows } = await db.query<{ id: number }>(
+      `INSERT INTO events (organizer_id, title, description, venue, starts_at, capacity, price_cents)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+      [organizerId, title, description, venue, startsAt, capacity, priceCents]
     );
+
+    eventIds.push(rows[0]!.id);
   }
 
   const values: string[] = [];
   const params: unknown[] = [];
 
-  for (let i = 0; i < EVENT_COUNT; i += 1) {
+  for (let i = 0; i < FILLER_EVENT_COUNT; i += 1) {
+    const organizerId = organizers[i % organizers.length]!.id;
     const base = params.length;
 
     params.push(
       organizerId,
       `${pick(TOPICS)} #${i + 1}`,
-      'Sample event generated for testing search and pagination.',
+      'Sample event generated by the seed script so that search, filtering and pagination can be tested with a realistic number of rows.',
       `${pick(CITIES)} Convention Centre`,
       daysFromNow(randomInt(1, 180), randomInt(9, 20)),
       randomInt(20, 500),
@@ -163,18 +187,72 @@ async function seed(): Promise<void> {
     );
   }
 
+  if (values.length > 0) {
+    await db.query(
+      `INSERT INTO events (organizer_id, title, description, venue, starts_at, capacity, price_cents)
+       VALUES ${values.join(', ')}`,
+      params
+    );
+  }
+
+  const jazzEventId = eventIds[3]!;
+  const uxEventId = eventIds[4]!;
+  const attendeeIds = attendees.map((u) => u.id);
+
+  await bookSeats(jazzEventId, attendeeIds.slice(0, 3));
+  await bookSeats(uxEventId, attendeeIds.slice(0, 2));
+  await bookSeats(eventIds[0]!, attendeeIds.slice(0, 2));
+
   await db.query(
-    `INSERT INTO events
-      (organizer_id, title, description, venue, starts_at, capacity, price_cents)
-     VALUES ${values.join(', ')}`,
-    params
+    'UPDATE events SET capacity = seats_booked WHERE id = $1',
+    [jazzEventId]
   );
 
-  console.log(`Seeded ${showcaseEvents.length + EVENT_COUNT} events.`);
-  console.log('Organizer: organizer@bookit.com');
-  console.log('Password: Password123');
+  for (const eventId of eventIds) {
+    const viewCount = randomInt(15, 90);
+
+    for (let i = 0; i < viewCount; i += 1) {
+      await db.query(
+        "INSERT INTO activity_log (event_id, user_id, type) VALUES ($1, $2, 'event_viewed')",
+        [eventId, Math.random() > 0.4 ? pick(attendees).id : null]
+      );
+    }
+  }
+
+  console.log(
+    `Seeded ${6 + FILLER_EVENT_COUNT} events, ${users.length} users.`
+  );
+  console.log(
+    'Login with organizer@bookit.com / user@bookit.com  (password: Password123)'
+  );
 
   await db.pool.end();
+}
+
+async function bookSeats(eventId: number, userIds: number[]): Promise<void> {
+  for (const userId of userIds) {
+    await db.withTransaction(async (client) => {
+      await client.query(
+        "INSERT INTO bookings (event_id, user_id, status) VALUES ($1, $2, 'confirmed')",
+        [eventId, userId]
+      );
+
+      await client.query(
+        'UPDATE events SET seats_booked = seats_booked + 1 WHERE id = $1',
+        [eventId]
+      );
+
+      await client.query(
+        "INSERT INTO activity_log (event_id, user_id, type) VALUES ($1, $2, 'booking_started')",
+        [eventId, userId]
+      );
+
+      await client.query(
+        "INSERT INTO activity_log (event_id, user_id, type) VALUES ($1, $2, 'booking_confirmed')",
+        [eventId, userId]
+      );
+    });
+  }
 }
 
 seed().catch((error: unknown) => {

@@ -1,8 +1,8 @@
 import { Router } from 'express';
-
 import authRoutes from './auth.routes';
 import bookingRoutes from './booking.routes';
 import eventRoutes from './event.routes';
+import meRoutes from './me.routes';
 import organizerRoutes from './organizer.routes';
 
 const router = Router();
@@ -10,6 +10,7 @@ const router = Router();
 router.use('/auth', authRoutes);
 router.use('/events', eventRoutes);
 router.use('/bookings', bookingRoutes);
+router.use('/me', meRoutes);
 router.use('/organizer', organizerRoutes);
 
 export default router;

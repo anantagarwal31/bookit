@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: bookit-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install && npm run build
+    startCommand: npm run start:deploy
+    healthCheckPath: /api/health
+
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+
+      - key: JWT_SECRET
+        generateValue: true
+
+      - key: NODE_ENV
+        value: production
+
+      - key: COOKIE_SAME_SITE
+        value: none
+
+      - key: COOKIE_SECURE
+        value: 'true'
+
+      - key: CLIENT_ORIGINS
+        sync: false

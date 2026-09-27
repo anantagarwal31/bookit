@@ -44,6 +44,54 @@ function createClient(): RequestFn {
 async function main(): Promise<void> {
   const stamp = Date.now();
 
+  const organizer = createClient();
+
+  const organizerSignup = await organizer('/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: `Concurrency Organizer ${stamp}`,
+      email: `concurrency-organizer-${stamp}@test.com`,
+      password: 'Password123',
+      role: 'organizer',
+    }),
+  });
+
+  if (organizerSignup.status !== 201) {
+    throw new Error(
+      `Organizer signup failed: ${organizerSignup.status}`
+    );
+  }
+
+  const eventResponse = await organizer('/organizer/events', {
+    method: 'POST',
+    body: JSON.stringify({
+      title: `Concurrency Test Event ${stamp}`,
+      description: 'Event used for the no-oversell concurrency test.',
+      venue: 'Concurrency Test Venue',
+      startsAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+      capacity: 1,
+      priceCents: 1000,
+    }),
+  });
+
+  if (eventResponse.status !== 201) {
+    throw new Error(
+      `Event creation failed: ${eventResponse.status}`
+    );
+  }
+
+  const eventId = (
+    eventResponse.body as {
+      event?: {
+        id?: number;
+      };
+    }
+  ).event?.id;
+
+  if (!eventId) {
+    throw new Error('Event ID was not returned');
+  }
+
   const users = [
     {
       name: 'Concurrency User 1',
@@ -79,12 +127,13 @@ async function main(): Promise<void> {
     clients.push(client);
   }
 
+  console.log(`Created capacity-1 event: ${eventId}`);
   console.log('Created two independent users.');
   console.log('Firing both booking requests at the same time...');
 
   const results = await Promise.all(
     clients.map((client) =>
-      client('/bookings/58', {
+      client(`/bookings/${eventId}`, {
         method: 'POST',
       })
     )

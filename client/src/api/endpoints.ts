@@ -1,16 +1,18 @@
 import { api } from './client';
 import type {
+  Attendee,
   Availability,
+  BookingWithEvent,
+  EventAnalytics,
   EventDetail,
+  EventPayload,
   EventSummary,
   LoginPayload,
   OrganizerEvent,
+  OwnedEvent,
   PaginationInfo,
   SignupPayload,
   User,
-  BookingWithEvent,
-  EventPayload,
-  OwnedEvent,
 } from '../types';
 
 export const authApi = {
@@ -71,7 +73,7 @@ export const eventsApi = {
 
 export const bookingsApi = {
   mine: () =>
-    api.get<{ bookings: BookingWithEvent[] }>('/bookings'),
+    api.get<{ bookings: BookingWithEvent[] }>('/me/bookings'),
 
   cancel: (id: number | string) =>
     api.delete<{
@@ -95,13 +97,13 @@ export const organizerApi = {
     api.patch<{ event: OwnedEvent }>(`/organizer/events/${id}`, payload),
 
   attendees: (id: string | number) =>
-    api.get<{ event: OwnedEvent; attendees: import('../types').Attendee[] }>(
+    api.get<{ event: OwnedEvent; attendees: Attendee[] }>(
       `/organizer/events/${id}/attendees`
     ),
 
   analytics: (id: string | number) =>
     api.get<{
       event: OwnedEvent;
-      analytics: import('../types').EventAnalytics;
+      analytics: EventAnalytics;
     }>(`/organizer/events/${id}/analytics`),
 };
