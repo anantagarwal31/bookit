@@ -95,3 +95,59 @@ export interface BookingWithEvent {
   price_cents: number;
   seats_remaining: number;
 }
+
+export interface EventInput {
+  title: string;
+  description: string;
+  venue: string;
+  startsAt: string;
+  capacity: number;
+  priceCents: number;
+}
+
+export type PartialEventInput = Partial<EventInput>;
+
+export interface EventRow {
+  id: number;
+  organizer_id: number;
+  title: string;
+  description: string;
+  venue: string;
+  starts_at: string;
+  capacity: number;
+  seats_booked: number;
+  price_cents: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrganizerEvent {
+  id: number;
+  title: string;
+  venue: string;
+  starts_at: string;
+  capacity: number;
+  seats_booked: number;
+  seats_remaining: number;
+  is_sold_out: boolean;
+  price_cents: number;
+  revenue_cents: number;
+}
+
+export interface Attendee {
+  booking_id: number;
+  status: BookingStatus;
+  booked_at: string;
+  user_id: number;
+  name: string;
+  email: string;
+}
+
+export interface EventAnalytics {
+  views: number;
+  bookingsStarted: number;
+  bookingsConfirmed: number;
+  bookingsCancelled: number;
+  viewToBookingRate: number;
+  startToBookingRate: number;
+}

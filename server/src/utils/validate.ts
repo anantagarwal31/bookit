@@ -63,3 +63,47 @@ export function requireId(value: unknown, field: string): number {
 
   return id;
 }
+
+interface NumberOptions {
+  min?: number;
+  max?: number;
+}
+
+export function requireInteger(
+  value: unknown,
+  field: string,
+  { min = 0, max = Number.MAX_SAFE_INTEGER }: NumberOptions = {}
+): number {
+  const number = Number(value);
+
+  if (!Number.isInteger(number)) {
+    throw new ApiError(400, `${field} must be a whole number`);
+  }
+
+  if (number < min) {
+    throw new ApiError(400, `${field} must be at least ${min}`);
+  }
+
+  if (number > max) {
+    throw new ApiError(400, `${field} must be at most ${max}`);
+  }
+
+  return number;
+}
+
+export function requireFutureDate(
+  value: unknown,
+  field: string
+): string {
+  const date = new Date(value as string);
+
+  if (Number.isNaN(date.getTime())) {
+    throw new ApiError(400, `${field} must be a valid date`);
+  }
+
+  if (date.getTime() <= Date.now()) {
+    throw new ApiError(400, `${field} must be in the future`);
+  }
+
+  return date.toISOString();
+}

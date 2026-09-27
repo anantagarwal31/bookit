@@ -4,6 +4,7 @@ import type {
   EventDetail,
   EventSummary,
   LoginPayload,
+  OrganizerEvent,
   PaginationInfo,
   SignupPayload,
   User,
@@ -77,4 +78,9 @@ export const bookingsApi = {
         status: 'cancelled';
       };
     }>(`/bookings/${id}`),
+};
+
+export const organizerApi = {
+  myEvents: () =>
+    api.get<{ events: OrganizerEvent[] }>('/organizer/events'),
 };

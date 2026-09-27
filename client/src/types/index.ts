@@ -65,3 +65,16 @@ export interface BookingWithEvent {
   price_cents: number;
   seats_remaining: number;
 }
+
+export interface OrganizerEvent {
+  id: number;
+  title: string;
+  venue: string;
+  starts_at: string;
+  capacity: number;
+  seats_booked: number;
+  seats_remaining: number;
+  is_sold_out: boolean;
+  price_cents: number;
+  revenue_cents: number;
+}
