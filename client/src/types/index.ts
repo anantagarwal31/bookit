@@ -50,3 +50,18 @@ export interface PaginationInfo {
   total: number;
   totalPages: number;
 }
+
+export type BookingStatus = 'confirmed' | 'cancelled';
+
+export interface BookingWithEvent {
+  id: number;
+  status: BookingStatus;
+  created_at: string;
+  cancelled_at: string | null;
+  event_id: number;
+  title: string;
+  venue: string;
+  starts_at: string;
+  price_cents: number;
+  seats_remaining: number;
+}

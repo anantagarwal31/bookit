@@ -7,6 +7,7 @@ import type {
   PaginationInfo,
   SignupPayload,
   User,
+  BookingWithEvent,
 } from '../types';
 
 export const authApi = {
@@ -61,6 +62,19 @@ export const eventsApi = {
         seats_booked: number;
         capacity: number;
         seats_remaining: number;
+      };
+    }>(`/bookings/${id}`),
+};
+
+export const bookingsApi = {
+  mine: () =>
+    api.get<{ bookings: BookingWithEvent[] }>('/bookings'),
+
+  cancel: (id: number | string) =>
+    api.delete<{
+      booking: {
+        id: number;
+        status: 'cancelled';
       };
     }>(`/bookings/${id}`),
 };
