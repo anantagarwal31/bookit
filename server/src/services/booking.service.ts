@@ -1,6 +1,8 @@
 import * as db from '../db/pool';
 import { ApiError } from '../utils/ApiError';
 import type { BookingRow, BookingWithEvent } from '../types';
+import { ACTIVITY, logActivity, logActivitySafely } from './activity.service';
+
 export interface BookSeatResult {
   booking: BookingRow;
   event: {
@@ -16,6 +18,12 @@ export async function bookSeat(
   eventId: number,
   userId: number
 ): Promise<BookSeatResult> {
+  await logActivitySafely({
+    eventId,
+    userId,
+    type: ACTIVITY.BOOKING_STARTED,
+  });
+
   return db.withTransaction(async (client) => {
     const { rows: eventRows } = await client.query<{
       id: number;
@@ -96,6 +104,15 @@ export async function bookSeat(
       );
     }
 
+    await logActivity(
+      {
+        eventId,
+        userId,
+        type: ACTIVITY.BOOKING_CONFIRMED,
+      },
+      client
+    );
+
     return {
       booking: bookingRows[0] as BookingRow,
       event: {
@@ -171,6 +188,15 @@ export async function cancelBooking(
         WHERE id = $1
           AND seats_booked > 0`,
       [booking.event_id]
+    );
+
+    await logActivity(
+      {
+        eventId: booking.event_id,
+        userId,
+        type: ACTIVITY.BOOKING_CANCELLED,
+      },
+      client
     );
 
     return {

@@ -1,6 +1,12 @@
 export type UserRole = 'user' | 'organizer';
 export type BookingStatus = 'confirmed' | 'cancelled';
 
+export type ActivityType =
+  | 'event_viewed'
+  | 'booking_started'
+  | 'booking_confirmed'
+  | 'booking_cancelled';
+
 export interface PublicUser {
   id: number;
   name: string;

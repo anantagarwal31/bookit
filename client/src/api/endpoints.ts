@@ -93,4 +93,15 @@ export const organizerApi = {
 
   update: (id: string | number, payload: Partial<EventPayload>) =>
     api.patch<{ event: OwnedEvent }>(`/organizer/events/${id}`, payload),
+
+  attendees: (id: string | number) =>
+    api.get<{ event: OwnedEvent; attendees: import('../types').Attendee[] }>(
+      `/organizer/events/${id}/attendees`
+    ),
+
+  analytics: (id: string | number) =>
+    api.get<{
+      event: OwnedEvent;
+      analytics: import('../types').EventAnalytics;
+    }>(`/organizer/events/${id}/analytics`),
 };

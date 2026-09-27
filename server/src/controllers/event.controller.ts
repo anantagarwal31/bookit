@@ -1,6 +1,7 @@
 import type { Request, Response } from 'express';
 import * as eventService from '../services/event.service';
 import * as v from '../utils/validate';
+import { ACTIVITY, logActivitySafely } from '../services/activity.service';
 
 export async function list(req: Request, res: Response): Promise<void> {
   const result = await eventService.listEvents({
@@ -15,10 +16,13 @@ export async function list(req: Request, res: Response): Promise<void> {
 
 export async function detail(req: Request, res: Response): Promise<void> {
   const eventId = v.requireId(req.params.id, 'event id');
-  const event = await eventService.getEventById(
+  const event = await eventService.getEventById(eventId, req.user?.id ?? null);
+
+  await logActivitySafely({
     eventId,
-    req.user?.id ?? null
-  );
+    userId: req.user?.id ?? null,
+    type: ACTIVITY.VIEWED,
+  });
 
   res.json({ event });
 }

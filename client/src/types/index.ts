@@ -101,3 +101,21 @@ export interface OwnedEvent {
   created_at: string;
   updated_at: string;
 }
+
+export interface Attendee {
+  booking_id: number;
+  status: BookingStatus;
+  booked_at: string;
+  user_id: number;
+  name: string;
+  email: string;
+}
+
+export interface EventAnalytics {
+  views: number;
+  bookingsStarted: number;
+  bookingsConfirmed: number;
+  bookingsCancelled: number;
+  viewToBookingRate: number;
+  startToBookingRate: number;
+}

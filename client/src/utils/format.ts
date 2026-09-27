@@ -24,3 +24,9 @@ export function toDateTimeLocalValue(isoString: string): string {
     date.getDate()
   )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
+
+export function formatDate(isoString: string): string {
+  return new Intl.DateTimeFormat('en-IN', {
+    dateStyle: 'medium',
+  }).format(new Date(isoString));
+}

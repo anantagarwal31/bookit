@@ -6,6 +6,7 @@ import MyBookingsPage from './pages/MyBookingsPage';
 import SignupPage from './pages/SignupPage';
 import OrganizerDashboardPage from './pages/OrganizerDashboardPage';
 import EventFormPage from './pages/EventFormPage';
+import EventInsightsPage from './pages/EventInsightsPage';
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
       <Route path="/organizer" element={<OrganizerDashboardPage />} />
       <Route path="/organizer/events/new" element={<EventFormPage />} />
       <Route path="/organizer/events/:id/edit" element={<EventFormPage />} />
+      <Route path="/organizer/events/:id" element={<EventInsightsPage />} />
     </Routes>
   );
 }
