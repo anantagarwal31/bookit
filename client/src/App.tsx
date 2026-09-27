@@ -5,6 +5,7 @@ import LoginPage from './pages/LoginPage';
 import MyBookingsPage from './pages/MyBookingsPage';
 import SignupPage from './pages/SignupPage';
 import OrganizerDashboardPage from './pages/OrganizerDashboardPage';
+import EventFormPage from './pages/EventFormPage';
 
 export default function App() {
   return (
@@ -15,6 +16,8 @@ export default function App() {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/my-bookings" element={<MyBookingsPage />} />
       <Route path="/organizer" element={<OrganizerDashboardPage />} />
+      <Route path="/organizer/events/new" element={<EventFormPage />} />
+      <Route path="/organizer/events/:id/edit" element={<EventFormPage />} />
     </Routes>
   );
 }

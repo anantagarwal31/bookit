@@ -78,3 +78,26 @@ export interface OrganizerEvent {
   price_cents: number;
   revenue_cents: number;
 }
+
+export interface EventPayload {
+  title: string;
+  description: string;
+  venue: string;
+  startsAt: string;
+  capacity: number;
+  priceCents: number;
+}
+
+export interface OwnedEvent {
+  id: number;
+  organizer_id: number;
+  title: string;
+  description: string;
+  venue: string;
+  starts_at: string;
+  capacity: number;
+  seats_booked: number;
+  price_cents: number;
+  created_at: string;
+  updated_at: string;
+}

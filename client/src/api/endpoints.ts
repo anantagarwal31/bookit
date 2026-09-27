@@ -9,6 +9,8 @@ import type {
   SignupPayload,
   User,
   BookingWithEvent,
+  EventPayload,
+  OwnedEvent,
 } from '../types';
 
 export const authApi = {
@@ -81,6 +83,14 @@ export const bookingsApi = {
 };
 
 export const organizerApi = {
-  myEvents: () =>
-    api.get<{ events: OrganizerEvent[] }>('/organizer/events'),
+  myEvents: () => api.get<{ events: OrganizerEvent[] }>('/organizer/events'),
+
+  getEvent: (id: string | number) =>
+    api.get<{ event: OwnedEvent }>(`/organizer/events/${id}`),
+
+  create: (payload: EventPayload) =>
+    api.post<{ event: OwnedEvent }>('/organizer/events', payload),
+
+  update: (id: string | number, payload: Partial<EventPayload>) =>
+    api.patch<{ event: OwnedEvent }>(`/organizer/events/${id}`, payload),
 };
