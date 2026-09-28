@@ -18,6 +18,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(attachUser);
 
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok' });
+});
+
 app.use('/api', routes);
 
 app.use(notFound);
